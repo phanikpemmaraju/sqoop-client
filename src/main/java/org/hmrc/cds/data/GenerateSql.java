@@ -38,8 +38,7 @@ public class GenerateSql {
         if (exitCode == 0)
             mysqlLoad(filePath, sqlFileName);
 
-        SqoopClient sqoopClient = new SqoopClient();
-        sqoopClient.runSqoop(filePath, hqlFileName);
+        new SqoopClient().runSqoop(filePath, hqlFileName);
     }
 
     private void mysqlLoad(final String filePath, final String sqlFileName) throws ClassNotFoundException, SQLException, IOException {
