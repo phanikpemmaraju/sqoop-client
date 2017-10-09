@@ -45,6 +45,7 @@ public class CustomsSqoopTool extends BaseSqoopTool {
         String createTableStr = tableWriter.getCreateTableStmt() + ";\n";
         String dropTable = "DROP TABLE " + table + ";\n";
         writeToFile(file, createTableStr, dropTable);
+
     }
 
     private void writeToFile(File file, String createTableStr, String dropTable) throws IOException {

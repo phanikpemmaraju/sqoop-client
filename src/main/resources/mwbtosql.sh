@@ -18,9 +18,7 @@ echo $OUTPUT
   --run-python "
 import os
 import grt
-from grt.modules import DbMySQLFE as fe
 c = grt.root.wb.doc.physicalModels[0].catalog
-print("Running from python " + c)
-fe.generateSQLCreateStatements(c, c.version, {})
-fe.createScriptForCatalogObjects(os.getenv('OUTPUT'), c, {})" \
+grt.modules.DbMySQLFE.generateSQLCreateStatements(c, c.version, {})
+grt.modules.DbMySQLFE.createScriptForCatalogObjects(os.getenv('OUTPUT'), c, {})" \
   --quit-when-done
