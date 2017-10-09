@@ -14,9 +14,7 @@ public class SqoopClient {
     private Logger LOG = LoggerFactory.getLogger(SqoopClient.class);
 
     private void setUp() {
-        String connection_string = GenerateSql.CONNECTION_STRING + GenerateSql.DB_NAME;
-        LOG.info("Database connection String: "+ connection_string);
-        SqoopOptions.setConnectString(connection_string);
+        SqoopOptions.setConnectString(GenerateSql.CONNECTION_STRING + GenerateSql.DB_NAME);
         SqoopOptions.setUsername(GenerateSql.USERNAME);
         SqoopOptions.setPassword(GenerateSql.PASSWORD);
         SqoopOptions.setDriverClassName(GenerateSql.DRIVER);

@@ -5,20 +5,22 @@
             <Pattern>%d{HH:mm:ss.SSS} >> %-3relative [%thread] %-5level %logger{25} - %msg %n</Pattern>
         </encoder>
     </appender>
+
     <appender name="rollingFileAppender"
               class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <File>/home/developer/sqoop-client.log</File>
+        <File>${HOME}/logs/sqoop-client.log</File>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <FileNamePattern>/home/developer/sqoop-client-%d{yyyy-MM-dd}.log</FileNamePattern>
+            <FileNamePattern>${HOME}/logs/sqoop-client-%d{yyyy-MM-dd}.log</FileNamePattern>
             <maxHistory>10</maxHistory>
         </rollingPolicy>
         <encoder>
             <Pattern>%d{HH:mm:ss} [%thread] %-5level %logger - %msg %n</Pattern>
         </encoder>
     </appender>
-    <logger name="org.movoto.selenium.example" level="INFO"
+
+    <logger name="org.hmrc.cds.data" level="INFO"
             additivity="false">
-        <appender-ref ref="consoleAppender" />
+        <!--<appender-ref ref="consoleAppender" /> -->
         <appender-ref ref="rollingFileAppender" />
     </logger>
 </configuration>
