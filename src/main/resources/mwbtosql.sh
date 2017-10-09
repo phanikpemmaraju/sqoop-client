@@ -3,7 +3,7 @@
 # prepare: set env MYSQL_WORKBENCH
 
 if [ "$MYSQL_WORKBENCH" = "" ]; then
-  export MYSQL_WORKBENCH="/home/cloudera/Downloads/usr/bin/mysql-workbench"
+  export MYSQL_WORKBENCH="/usr/bin/mysql-workbench"
 fi
 
 export INPUT=$(cd $(dirname $1);pwd)/$(basename $1)
@@ -20,6 +20,7 @@ import os
 import grt
 from grt.modules import DbMySQLFE as fe
 c = grt.root.wb.doc.physicalModels[0].catalog
+print("Running from python " + c)
 fe.generateSQLCreateStatements(c, c.version, {})
 fe.createScriptForCatalogObjects(os.getenv('OUTPUT'), c, {})" \
   --quit-when-done

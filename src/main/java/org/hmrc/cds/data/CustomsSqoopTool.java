@@ -41,14 +41,10 @@ public class CustomsSqoopTool extends BaseSqoopTool {
     }
 
     private void generateTableHQL(SqoopOptions options, File file, String table) throws IOException {
-        try{
-            TableDefWriter tableWriter = new TableDefWriter(options, this.manager, table, table, options.getConf(), true);
-            String createTableStr = tableWriter.getCreateTableStmt() + ";\n";
-            String dropTable = "DROP TABLE " + table + ";\n";
-            writeToFile(file, createTableStr, dropTable);
-        } catch (IOException io){
-            io.printStackTrace();
-        }
+        TableDefWriter tableWriter = new TableDefWriter(options, this.manager, table, table, options.getConf(), true);
+        String createTableStr = tableWriter.getCreateTableStmt() + ";\n";
+        String dropTable = "DROP TABLE " + table + ";\n";
+        writeToFile(file, createTableStr, dropTable);
     }
 
     private void writeToFile(File file, String createTableStr, String dropTable) throws IOException {
