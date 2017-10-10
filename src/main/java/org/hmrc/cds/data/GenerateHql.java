@@ -5,10 +5,10 @@ import org.apache.ibatis.jdbc.ScriptRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -20,6 +20,9 @@ public class GenerateHql {
     public static final String USERNAME = PropertiesFileUtil.getProperty("USERNAME");
     public static final String PASSWORD = PropertiesFileUtil.getProperty("PASSWORD");
     public static final String DRIVER = PropertiesFileUtil.getProperty("DRIVER");
+    public static final String SQL_FILE_EXTENSION = ".sql";
+    public static final String HQL_FILE_EXTENSION = ".q";
+    public static final String BASH_SCRIPT_FILE = "mwbtosql.sh";
 
     private static Logger logger = LoggerFactory.getLogger(GenerateHql.class);
 
@@ -33,10 +36,10 @@ public class GenerateHql {
     public void generateHqlFromMwb(String resourcesPath) throws IOException, InterruptedException, SQLException, ClassNotFoundException {
         String filePath = FilenameUtils.getFullPath(resourcesPath);
         String fileName = FilenameUtils.getName(resourcesPath);
-        String sqlFileName = getFileNameByExt(fileName, ".sql");
-        final String hqlFileName = getFileNameByExt(fileName, ".q");
+        String sqlFileName = getFileNameByExt(fileName, SQL_FILE_EXTENSION);
+        final String hqlFileName = getFileNameByExt(fileName, HQL_FILE_EXTENSION);
 
-        ProcessBuilder builder = new ProcessBuilder("/bin/bash", "mwbtosql.sh", fileName, sqlFileName);
+        ProcessBuilder builder = new ProcessBuilder("/bin/bash", BASH_SCRIPT_FILE, fileName, sqlFileName);
         builder.directory(new File(filePath));
         Process process = builder.start();
         int exitCode = process.waitFor();
@@ -50,11 +53,12 @@ public class GenerateHql {
     }
 
     private void mysqlLoad(final String filePath, final String sqlFileName) throws ClassNotFoundException, SQLException, IOException {
-        try (InputStreamReader inputStreamReader = new InputStreamReader(new FileInputStream(new File(filePath + sqlFileName)));
-             Connection connection = DriverManager.getConnection(CONNECTION_STRING,USERNAME,PASSWORD);) {
+
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath + sqlFileName))) {
+            Connection connection = DriverManager.getConnection(CONNECTION_STRING, USERNAME, PASSWORD);
 
             ScriptRunner sr = new ScriptRunner(connection);
-            sr.runScript(inputStreamReader);
+            sr.runScript(br);
         }
     }
 
