@@ -14,7 +14,8 @@ public class SqoopClient {
         sqoopOptions.setUsername(GenerateHql.USERNAME);
         sqoopOptions.setPassword(GenerateHql.PASSWORD);
         sqoopOptions.setDriverClassName(GenerateHql.DRIVER);
-}
+        sqoopOptions.setHiveDropDelims(true);
+    }
 
     public void runSqoop(final String filePath,final String fileName) throws IOException {
         setUp();

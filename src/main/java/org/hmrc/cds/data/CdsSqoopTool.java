@@ -24,6 +24,9 @@ public class CdsSqoopTool extends BaseSqoopTool {
 
     private final StandardOpenOption APPEND = StandardOpenOption.APPEND;
 
+    private final String STORE_TEXT_FILE = " STORED AS TEXTFILE;";
+
+
     @Override
     public int run(SqoopOptions sqoopOptions) {
         return 0;
@@ -45,9 +48,9 @@ public class CdsSqoopTool extends BaseSqoopTool {
     }
 
     private void generateTableHQL(SqoopOptions options, File file, String table) throws IOException {
-        TableDefWriter tableWriter = new TableDefWriter(options, this.manager, table, table, options.getConf(), true);
-        String createTableStr = tableWriter.getCreateTableStmt();
-        String dropTable = "DROP TABLE " + table;
+        TableDefWriter tableWriter = new TableDefWriter(options, this.manager, table, table, options.getConf(), false);
+        String createTableStr = tableWriter.getCreateTableStmt().split("ROW FORMAT")[0].trim() + STORE_TEXT_FILE;
+        String dropTable = "DROP TABLE IF EXISTS " + table + ";";
         writeToFile(file, createTableStr, dropTable);
 
     }
