@@ -21,10 +21,10 @@ public class GenerateSql {
     public static final String PASSWORD = PropertiesFileUtil.getProperty("PASSWORD");
     public static final String DRIVER = PropertiesFileUtil.getProperty("DRIVER");
 
-    private static Logger LOG = LoggerFactory.getLogger(GenerateSql.class);
+    private static Logger logger = LoggerFactory.getLogger(GenerateSql.class);
 
     public static void main(String... args) throws IOException, InterruptedException, SQLException, ClassNotFoundException {
-        LOG.info(">>>> Start of generation of Hive HQL from MySql Workbench file <<<< ");
+        logger.info(">>>> Start of generation of Hive HQL from MySql Workbench file <<<< ");
         GenerateSql sql = new GenerateSql();
         String RESOURCES_PATH = "/home/developer/sqoop-files/DataVault_MySQLWB.mwb";//"src/main/resources";
         sql.generateHqlFromMwb(RESOURCES_PATH);
@@ -43,10 +43,10 @@ public class GenerateSql {
         if (exitCode == 0)
             mysqlLoad(filePath, sqlFileName);
 
-        LOG.info(">>>> SQL generated successfully <<<<");
+        logger.info(">>>> SQL generated successfully <<<<");
 
         new SqoopClient().runSqoop(filePath, hqlFileName);
-        LOG.info(">>>> End of generation of Hive HQL from MySql Workbench file <<<<");
+        logger.info(">>>> End of generation of Hive HQL from MySql Workbench file <<<<");
     }
 
     private void mysqlLoad(final String filePath, final String sqlFileName) throws ClassNotFoundException, SQLException, IOException {

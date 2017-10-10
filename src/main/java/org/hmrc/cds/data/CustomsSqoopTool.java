@@ -20,6 +20,8 @@ public class CustomsSqoopTool extends BaseSqoopTool {
         super("customs-tool");
     }
 
+    private final String LINE_SEPERATOR = System.lineSeparator();
+
     @Override
     public int run(SqoopOptions sqoopOptions) {
         return 0;
@@ -42,15 +44,16 @@ public class CustomsSqoopTool extends BaseSqoopTool {
 
     private void generateTableHQL(SqoopOptions options, File file, String table) throws IOException {
         TableDefWriter tableWriter = new TableDefWriter(options, this.manager, table, table, options.getConf(), true);
-        String createTableStr = tableWriter.getCreateTableStmt() + ";\n";
-        String dropTable = "DROP TABLE " + table + ";\n";
+        String createTableStr = tableWriter.getCreateTableStmt();
+        String dropTable = "DROP TABLE " + table;
         writeToFile(file, createTableStr, dropTable);
 
     }
 
     private void writeToFile(File file, String createTableStr, String dropTable) throws IOException {
-        Files.write(file.toPath(),dropTable.getBytes(), StandardOpenOption.APPEND);
-        Files.write(file.toPath(), createTableStr.getBytes(), StandardOpenOption.APPEND);
+        Files.write(file.toPath(),(dropTable + LINE_SEPERATOR).getBytes(), StandardOpenOption.APPEND);
+        Files.write(file.toPath(), (createTableStr +  LINE_SEPERATOR).getBytes(), StandardOpenOption.APPEND);
+        Files.write(file.toPath(), LINE_SEPERATOR.getBytes() , StandardOpenOption.APPEND);
     }
 
 }
