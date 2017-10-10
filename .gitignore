@@ -1,0 +1,65 @@
+keystore.jks
+
+# Eclipse config files #
+########################
+.metadata
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+.settings/
+.loadpath
+.recommenders
+
+# Eclipse Core
+.project
+
+# JDT-specific (Eclipse Java Development Tools)
+.classpath
+
+# JetBrains config files #
+##########################
+.idea
+*.iml
+/out/
+.idea_modules/
+META-INF
+*/META-INF/*
+
+# Maven build artifacts files #
+###############################
+target/
+overlays/
+
+
+### Java template
+*.class
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+
+*/MANIFEST.MF
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+
+# Logs and databases #
+######################
+*.log
+
+# OSX generated files #
+######################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db

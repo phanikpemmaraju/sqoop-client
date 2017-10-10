@@ -22,6 +22,8 @@ public class CdsSqoopTool extends BaseSqoopTool {
 
     private final String LINE_SEPERATOR = System.lineSeparator();
 
+    private final StandardOpenOption APPEND = StandardOpenOption.APPEND;
+
     @Override
     public int run(SqoopOptions sqoopOptions) {
         return 0;
@@ -51,9 +53,9 @@ public class CdsSqoopTool extends BaseSqoopTool {
     }
 
     private void writeToFile(File file, String createTableStr, String dropTable) throws IOException {
-        Files.write(file.toPath(),(dropTable + LINE_SEPERATOR).getBytes(), StandardOpenOption.APPEND);
-        Files.write(file.toPath(), (createTableStr +  LINE_SEPERATOR).getBytes(), StandardOpenOption.APPEND);
-        Files.write(file.toPath(), LINE_SEPERATOR.getBytes() , StandardOpenOption.APPEND);
+        Files.write(file.toPath(),(dropTable + LINE_SEPERATOR).getBytes(), APPEND);
+        Files.write(file.toPath(), (createTableStr +  LINE_SEPERATOR).getBytes(), APPEND);
+        Files.write(file.toPath(), LINE_SEPERATOR.getBytes() , APPEND);
     }
 
 }
