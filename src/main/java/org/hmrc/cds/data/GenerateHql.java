@@ -54,11 +54,11 @@ public class GenerateHql {
 
     private void mysqlLoad(final String filePath, final String sqlFileName) throws ClassNotFoundException, SQLException, IOException {
 
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath + sqlFileName))) {
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(filePath + sqlFileName))) {
             Connection connection = DriverManager.getConnection(CONNECTION_STRING, USERNAME, PASSWORD);
 
-            ScriptRunner sr = new ScriptRunner(connection);
-            sr.runScript(br);
+            ScriptRunner scriptRunner = new ScriptRunner(connection);
+            scriptRunner.runScript(bufferedReader);
         }
     }
 
