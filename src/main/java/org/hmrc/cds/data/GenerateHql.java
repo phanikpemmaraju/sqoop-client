@@ -13,7 +13,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class GenerateSql {
+public class GenerateHql {
 
     public static final String CONNECTION_STRING = PropertiesFileUtil.getProperty("CONNECTION_STRING");
     public static final String DB_NAME = PropertiesFileUtil.getProperty("DB_NAME");
@@ -21,11 +21,11 @@ public class GenerateSql {
     public static final String PASSWORD = PropertiesFileUtil.getProperty("PASSWORD");
     public static final String DRIVER = PropertiesFileUtil.getProperty("DRIVER");
 
-    private static Logger logger = LoggerFactory.getLogger(GenerateSql.class);
+    private static Logger logger = LoggerFactory.getLogger(GenerateHql.class);
 
     public static void main(String... args) throws IOException, InterruptedException, SQLException, ClassNotFoundException {
         logger.info(">>>> Start of generation of Hive HQL from MySql Workbench file <<<< ");
-        GenerateSql sql = new GenerateSql();
+        GenerateHql sql = new GenerateHql();
         String RESOURCES_PATH = "/home/developer/sqoop-files/DataVault_MySQLWB.mwb";//"src/main/resources";
         sql.generateHqlFromMwb(RESOURCES_PATH);
     }

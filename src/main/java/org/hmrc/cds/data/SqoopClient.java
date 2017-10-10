@@ -6,19 +6,19 @@ import java.io.IOException;
 
 public class SqoopClient {
 
-    private SqoopOptions SqoopOptions = new SqoopOptions();
-    private CustomsSqoopTool customsSqoopTool = new CustomsSqoopTool();
+    private SqoopOptions sqoopOptions = new SqoopOptions();
+    private CdsSqoopTool cdsSqoopTool = new CdsSqoopTool();
 
     private void setUp() {
-        SqoopOptions.setConnectString(GenerateSql.CONNECTION_STRING + GenerateSql.DB_NAME);
-        SqoopOptions.setUsername(GenerateSql.USERNAME);
-        SqoopOptions.setPassword(GenerateSql.PASSWORD);
-        SqoopOptions.setDriverClassName(GenerateSql.DRIVER);
+        sqoopOptions.setConnectString(GenerateHql.CONNECTION_STRING + GenerateHql.DB_NAME);
+        sqoopOptions.setUsername(GenerateHql.USERNAME);
+        sqoopOptions.setPassword(GenerateHql.PASSWORD);
+        sqoopOptions.setDriverClassName(GenerateHql.DRIVER);
 }
 
     public void runSqoop(final String filePath,final String fileName) throws IOException {
         setUp();
-        customsSqoopTool.generateDataVaultHQL(SqoopOptions, filePath, fileName);
+        cdsSqoopTool.generateDataVaultHQL(sqoopOptions, filePath, fileName);
     }
 
 

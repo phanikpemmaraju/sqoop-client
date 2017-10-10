@@ -14,9 +14,9 @@ import java.util.Arrays;
 import java.util.List;
 
 
-public class CustomsSqoopTool extends BaseSqoopTool {
+public class CdsSqoopTool extends BaseSqoopTool {
 
-    public CustomsSqoopTool() {
+    public CdsSqoopTool() {
         super("customs-tool");
     }
 
