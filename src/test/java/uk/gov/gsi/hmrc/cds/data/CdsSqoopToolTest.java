@@ -42,22 +42,11 @@ public class CdsSqoopToolTest {
 
         cdsSqoopTool.setTableWriter(writer);
         List<String> statements = cdsSqoopTool.generateTableHQL(options, table);
-        assertTrue(statements.size() == 2);
+        assertTrue(statements.size() == 3);
         assertEquals("DROP TABLE IF EXISTS table;", statements.get(0));
         assertTrue(statements.get(1).indexOf(
                 "CREATE TABLE IF NOT EXISTS `" + table + "`") != -1);
-
-
-        final JobData jobData = new JobData(options, cdsSqoopTool);
-        conf.set(ConnFactory.FACTORY_CLASS_NAMES_KEY, SqoopBuilders.AlwaysDummyFactory.class.getName());
-
-        ConnFactory factory = new ConnFactory(conf);
-
-        ConnManager manager = factory.getManager(new JobData(new SqoopOptions(), cdsSqoopTool));
-        cdsSqoopTool.setManager(manager);
-
-        List<String> allTables = cdsSqoopTool.getAllTables(options);
-        System.out.println("Tables Size: " + allTables.size());
+        assertEquals("",statements.get(2));
     }
 
     @Test
