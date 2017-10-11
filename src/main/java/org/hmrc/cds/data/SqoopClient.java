@@ -6,10 +6,14 @@ import java.io.IOException;
 
 public class SqoopClient {
 
-    private SqoopOptions sqoopOptions = new SqoopOptions();
-    private CdsSqoopTool cdsSqoopTool = new CdsSqoopTool();
+    private static SqoopOptions sqoopOptions = new SqoopOptions();
+    private static CdsSqoopTool cdsSqoopTool = new CdsSqoopTool();
 
-    private void setUp() {
+    public static void main(String... args) throws IOException{
+        runSqoop("src/main/resources/hive-hql","hive.q");
+    }
+
+    private static void setUp() {
         sqoopOptions.setConnectString(GenerateHql.CONNECTION_STRING + GenerateHql.DB_NAME);
         sqoopOptions.setUsername(GenerateHql.USERNAME);
         sqoopOptions.setPassword(GenerateHql.PASSWORD);
@@ -17,7 +21,7 @@ public class SqoopClient {
         sqoopOptions.setHiveDropDelims(true);
     }
 
-    public void runSqoop(final String filePath,final String fileName) throws IOException {
+    public static void runSqoop(final String filePath,final String fileName) throws IOException {
         setUp();
         cdsSqoopTool.generateDataVaultHQL(sqoopOptions, filePath, fileName);
     }
