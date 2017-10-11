@@ -14,6 +14,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 
@@ -77,14 +78,16 @@ public class CdsSqoopTool extends BaseSqoopTool {
         String createTableStr = tableWriter.getCreateTableStmt().split("ROW FORMAT")[0].trim() + STORE_TEXT_FILE;
         String dropTable = "DROP TABLE IF EXISTS " + table + ";";
         List<String> hqlStatements = new ArrayList<>();
-        hqlStatements.add(0,dropTable); hqlStatements.add(1,createTableStr); tableWriter = null;
+
+        hqlStatements.add(dropTable); hqlStatements.add(createTableStr); hqlStatements.add("");tableWriter = null;
         return hqlStatements;
     }
 
     private void writeToFile(File file, List<String> hqlStatements) throws IOException {
-        Files.write(file.toPath(),(hqlStatements.get(0) + LINE_SEPERATOR).getBytes(), APPEND);
-        Files.write(file.toPath(), (hqlStatements.get(1) +  LINE_SEPERATOR).getBytes(), APPEND);
-        Files.write(file.toPath(), LINE_SEPERATOR.getBytes() , APPEND);
+        Iterator<String> sqlIterator = hqlStatements.iterator();
+        while(sqlIterator.hasNext()){
+            Files.write(file.toPath(),(sqlIterator.next().trim() + LINE_SEPERATOR).getBytes(), APPEND);
+        }
     }
 
 }

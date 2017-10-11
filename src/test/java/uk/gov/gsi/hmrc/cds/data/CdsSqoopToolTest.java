@@ -65,7 +65,6 @@ public class CdsSqoopToolTest {
         Configuration conf = new Configuration();
         SqoopOptions options = new SqoopOptions();
 
-        final JobData jobData = new JobData(options, cdsSqoopTool);
         conf.set(ConnFactory.FACTORY_CLASS_NAMES_KEY, SqoopBuilders.AlwaysDummyFactory.class.getName());
 
         ConnFactory factory = new ConnFactory(conf);
