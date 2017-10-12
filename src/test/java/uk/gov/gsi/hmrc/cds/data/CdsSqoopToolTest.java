@@ -31,9 +31,10 @@ public class CdsSqoopToolTest {
     @Test
     public void testGenerateTableHQL() throws Exception {
         String table = "table";
-
+        final String HIVE_DATABASE_NAME_CLASSIFIER = "${DATAVAULT_DB}";
         Configuration conf = new Configuration();
         SqoopOptions options = new SqoopOptions();
+        options.setHiveDatabaseName(HIVE_DATABASE_NAME_CLASSIFIER);
         TableDefWriter writer = new TableDefWriter(options, null,
                 table, table, conf, false);
 
@@ -43,9 +44,9 @@ public class CdsSqoopToolTest {
         cdsSqoopTool.setTableWriter(writer);
         List<String> statements = cdsSqoopTool.generateTableHQL(options, table);
         assertTrue(statements.size() == 3);
-        assertEquals("DROP TABLE IF EXISTS table;", statements.get(0));
+        assertEquals("DROP TABLE IF EXISTS `" + HIVE_DATABASE_NAME_CLASSIFIER + "`." + table + ";", statements.get(0));
         assertTrue(statements.get(1).indexOf(
-                "CREATE TABLE IF NOT EXISTS `" + table + "`") != -1);
+                "CREATE TABLE IF NOT EXISTS `" + HIVE_DATABASE_NAME_CLASSIFIER + "`.`" + table + "`") != -1);
         assertEquals("",statements.get(2));
     }
 

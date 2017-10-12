@@ -15,16 +15,24 @@ import java.sql.SQLException;
 
 public class GenerateHql {
 
-    public static final String CONNECTION_STRING = PropertiesFileUtil.getProperty("CONNECTION_STRING");
-    public static final String DB_NAME = PropertiesFileUtil.getProperty("DB_NAME");
-    public static final String USERNAME = PropertiesFileUtil.getProperty("USERNAME");
-    public static final String PASSWORD = PropertiesFileUtil.getProperty("PASSWORD");
-    public static final String DRIVER = PropertiesFileUtil.getProperty("DRIVER");
+    public static String CONNECTION_STRING = PropertiesFileUtil.getProperty("CONNECTION_STRING");
+    public static String DB_NAME = PropertiesFileUtil.getProperty("DB_NAME");
+    public static String USERNAME = PropertiesFileUtil.getProperty("USERNAME");
+    public static String PASSWORD = PropertiesFileUtil.getProperty("PASSWORD");
+    public static String DRIVER = PropertiesFileUtil.getProperty("DRIVER");
+
     public static final String SQL_FILE_EXTENSION = ".sql";
     public static final String HQL_FILE_EXTENSION = ".q";
     public static final String BASH_SCRIPT_FILE = "mwbtosql.sh";
 
     private static Logger logger = LoggerFactory.getLogger(GenerateHql.class);
+
+    private SqoopClient sqoopClient;
+
+    public void setSqoopClient(SqoopClient sqoopClient) {
+        this.sqoopClient = sqoopClient;
+    }
+
 
     public static void main(String... args) throws IOException, InterruptedException, SQLException, ClassNotFoundException {
         logger.info(">>>> Start of generation of Hive HQL from MySql Workbench file <<<< ");
@@ -48,7 +56,9 @@ public class GenerateHql {
 
         logger.info(">>>> SQL generated successfully <<<<");
 
-        new SqoopClient().runSqoop(filePath, hqlFileName);
+        sqoopClient = (sqoopClient == null) ? new SqoopClient() : sqoopClient;
+        sqoopClient.runSqoop(filePath, hqlFileName);
+
         logger.info(">>>> End of generation of Hive HQL from MySql Workbench file <<<<");
     }
 

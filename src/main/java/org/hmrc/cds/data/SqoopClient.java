@@ -6,6 +6,7 @@ import java.io.IOException;
 
 public class SqoopClient {
 
+    private static final String HIVE_DATABASE_NAME_CLASSIFIER = "${DATAVAULT_DB}";
     private static SqoopOptions sqoopOptions = new SqoopOptions();
     private static CdsSqoopTool cdsSqoopTool = new CdsSqoopTool();
 
@@ -19,6 +20,7 @@ public class SqoopClient {
         sqoopOptions.setPassword(GenerateHql.PASSWORD);
         sqoopOptions.setDriverClassName(GenerateHql.DRIVER);
         sqoopOptions.setHiveDropDelims(true);
+        sqoopOptions.setHiveDatabaseName(HIVE_DATABASE_NAME_CLASSIFIER);
     }
 
     public static void runSqoop(final String filePath,final String fileName) throws IOException {

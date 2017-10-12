@@ -62,7 +62,7 @@ public class CdsSqoopTool extends BaseSqoopTool {
         }
 
         for(int tableIndex=0;tableIndex<tables.size();tableIndex++){
-            List<String> statements = generateTableHQL(options, tables.get(tableIndex));
+            List<String> statements = generateTableHQL(options,  tables.get(tableIndex));
             writeToFile(file, statements);
         }
     }
@@ -76,14 +76,14 @@ public class CdsSqoopTool extends BaseSqoopTool {
     public List<String> generateTableHQL(SqoopOptions options, String table) throws IOException {
         tableWriter = (tableWriter == null) ? new TableDefWriter(options, this.manager, table, table, options.getConf(), false) : tableWriter;
         String createTableStr = tableWriter.getCreateTableStmt().split("ROW FORMAT")[0].trim() + STORE_TEXT_FILE;
-        String dropTable = "DROP TABLE IF EXISTS " + table + ";";
+        String dropTable = "DROP TABLE IF EXISTS `" + options.getHiveDatabaseName() + "`." + table + ";";
         List<String> hqlStatements = new ArrayList<>();
 
         hqlStatements.add(dropTable); hqlStatements.add(createTableStr); hqlStatements.add("");tableWriter = null;
         return hqlStatements;
     }
 
-    private void writeToFile(File file, List<String> hqlStatements) throws IOException {
+    public void writeToFile(File file, List<String> hqlStatements) throws IOException {
         Iterator<String> sqlIterator = hqlStatements.iterator();
         while(sqlIterator.hasNext()){
             Files.write(file.toPath(),(sqlIterator.next().trim() + LINE_SEPERATOR).getBytes(), APPEND);
