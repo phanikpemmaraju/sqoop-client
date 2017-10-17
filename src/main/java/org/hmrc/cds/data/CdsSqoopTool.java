@@ -10,13 +10,15 @@ import org.apache.sqoop.tool.BaseSqoopTool;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-
 
 public class CdsSqoopTool extends BaseSqoopTool {
 
@@ -49,8 +51,8 @@ public class CdsSqoopTool extends BaseSqoopTool {
     }
 
 
-    public void generateDataVaultHQL(SqoopOptions options, String outputDirectory , String fileName) throws IOException{
-        final List<String> tables = getAllTables(options);
+    public void generateDataVaultHQL(SqoopOptions options, String outputDirectory , String fileName) throws IOException , SQLException, ClassNotFoundException{
+        /*final List<String> tables = getAllTables(options);
         File file = Paths.get(outputDirectory + File.separator + fileName).toFile();
 
         if(Files.notExists(file.toPath())) {
@@ -64,7 +66,8 @@ public class CdsSqoopTool extends BaseSqoopTool {
         for(int tableIndex=0;tableIndex<tables.size();tableIndex++){
             List<String> statements = generateTableHQL(options,  tables.get(tableIndex));
             writeToFile(file, statements);
-        }
+        }*/
+        writeToHiveTables();
     }
 
     public List<String> getAllTables(SqoopOptions options) throws IOException{
@@ -81,6 +84,21 @@ public class CdsSqoopTool extends BaseSqoopTool {
 
         hqlStatements.add(dropTable); hqlStatements.add(createTableStr); hqlStatements.add("");tableWriter = null;
         return hqlStatements;
+    }
+
+    public void writeToHiveTables() throws SQLException, IOException, ClassNotFoundException {
+
+        String driverName = "org.apache.hive.jdbc.HiveDriver";
+        Class.forName(driverName);
+
+        Connection con = DriverManager.getConnection("jdbc:hive2://localhost:10000/test_dv", "", "");
+        Statement stmt = con.createStatement();
+        String tableName = "test";
+        String filepath = this.getClass().getClassLoader().getResource("test.txt").getPath().toString();
+        System.out.println(">>>> filepath <<<<< " + filepath);
+        String sql = "LOAD DATA LOCAL INPATH '" + filepath + "' INTO TABLE " + tableName;
+        System.out.println("Running: " + sql);
+        stmt.executeQuery(sql);
     }
 
     public void writeToFile(File file, List<String> hqlStatements) throws IOException {

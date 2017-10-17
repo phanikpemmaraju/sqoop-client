@@ -1,7 +1,10 @@
 package org.hmrc.cds.data;
 
 import com.cloudera.sqoop.SqoopOptions;
+
 import java.io.IOException;
+import java.net.URL;
+import java.sql.SQLException;
 
 
 public class SqoopClient {
@@ -10,7 +13,10 @@ public class SqoopClient {
     private static SqoopOptions sqoopOptions = new SqoopOptions();
     private static CdsSqoopTool cdsSqoopTool = new CdsSqoopTool();
 
-    public static void main(String... args) throws IOException{
+    public static void main(String... args) throws SQLException, IOException, ClassNotFoundException{
+        String properties = "connection.properties";
+        URL url = SqoopClient.class.getClassLoader().getResource("test.txt");
+        System.out.println(url.getPath().toString());
         runSqoop("src/main/resources/hive-hql","hive.q");
     }
 
@@ -23,10 +29,11 @@ public class SqoopClient {
         sqoopOptions.setHiveDatabaseName(HIVE_DATABASE_NAME_CLASSIFIER);
     }
 
-    public static void runSqoop(final String filePath,final String fileName) throws IOException {
+    public static void runSqoop(final String filePath,final String fileName) throws SQLException, IOException, ClassNotFoundException {
         setUp();
         cdsSqoopTool.generateDataVaultHQL(sqoopOptions, filePath, fileName);
     }
+
 
 
 }
