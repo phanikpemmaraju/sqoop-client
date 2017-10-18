@@ -3,13 +3,19 @@ package org.hmrc.cds.data;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.metastore.JobData;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IOUtils;
+import org.apache.hadoop.util.Progressable;
 import org.apache.sqoop.ConnFactory;
 import org.apache.sqoop.hive.TableDefWriter;
 import org.apache.sqoop.tool.BaseSqoopTool;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.net.URI;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -32,6 +38,10 @@ public class CdsSqoopTool extends BaseSqoopTool {
 
     private final String STORE_TEXT_FILE = " STORED AS TEXTFILE;";
 
+    private final String TEST_FILES_PATH = "src/main/resources/test-files";
+
+    public static final String HDFS_TMP_PATH = "/tmp/";
+
     public CdsSqoopTool() {
         super("customs-tool");
     }
@@ -51,26 +61,37 @@ public class CdsSqoopTool extends BaseSqoopTool {
     }
 
 
-    public void generateDataVaultHQL(SqoopOptions options, String outputDirectory , String fileName) throws IOException , SQLException, ClassNotFoundException{
-        /*final List<String> tables = getAllTables(options);
+    public void generateDataVaultHQL(SqoopOptions options, String outputDirectory, String fileName) throws IOException, SQLException, ClassNotFoundException {
+        final List<String> tables = getAllTables(options);
         File file = Paths.get(outputDirectory + File.separator + fileName).toFile();
 
-        if(Files.notExists(file.toPath())) {
+        if (Files.notExists(file.toPath())) {
             file.getParentFile().mkdirs();
             Files.createFile(file.toPath());
-        }else{
+        } else {
             file.delete();
             file.createNewFile();
         }
 
-        for(int tableIndex=0;tableIndex<tables.size();tableIndex++){
-            List<String> statements = generateTableHQL(options,  tables.get(tableIndex));
+        for (int tableIndex = 0; tableIndex < tables.size(); tableIndex++) {
+            List<String> statements = generateTableHQL(options, tables.get(tableIndex));
             writeToFile(file, statements);
-        }*/
-        writeToHiveTables();
+        }
     }
 
-    public List<String> getAllTables(SqoopOptions options) throws IOException{
+    public void createAndPopulateDataVault() throws IOException, SQLException, ClassNotFoundException {
+        File dataVaultFiles = Paths.get(TEST_FILES_PATH).toFile();
+        List<String> files = Arrays.asList(dataVaultFiles.list());
+
+        for (int fileIndex = 0; fileIndex < files.size(); fileIndex++) {
+            String filePath = files.get(fileIndex);
+            writeToHDFSFile(filePath);
+            writeToHiveTable(filePath.split(".txt")[0], filePath);
+        }
+
+    }
+
+    public List<String> getAllTables(SqoopOptions options) throws IOException {
         final JobData jobData = new JobData(options, this);
         manager = (manager == null) ? (new ConnFactory(options.getConf())).getManager(jobData) : manager;
         return Arrays.asList(manager.listTables());
@@ -82,30 +103,55 @@ public class CdsSqoopTool extends BaseSqoopTool {
         String dropTable = "DROP TABLE IF EXISTS `" + options.getHiveDatabaseName() + "`." + table + ";";
         List<String> hqlStatements = new ArrayList<>();
 
-        hqlStatements.add(dropTable); hqlStatements.add(createTableStr); hqlStatements.add("");tableWriter = null;
+        hqlStatements.add(dropTable);
+        hqlStatements.add(createTableStr);
+        hqlStatements.add("");
+        tableWriter = null;
         return hqlStatements;
     }
 
-    public void writeToHiveTables() throws SQLException, IOException, ClassNotFoundException {
+    private void writeToHDFSFile(String fileName) throws IOException {
+        System.out.println(" >>>> start of writeToHDFSFile <<<<< ");
 
-        String driverName = "org.apache.hive.jdbc.HiveDriver";
-        Class.forName(driverName);
+        final String sourceFilePath = getSourceFilePath(TEST_FILES_PATH + File.separator + fileName);
+        try(InputStream in = new BufferedInputStream(new FileInputStream(sourceFilePath));){
+            Configuration conf = new Configuration();
+            conf.set("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
+            conf.set("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName());
+            FileSystem fs = FileSystem.get(URI.create("hdfs://quickstart.cloudera:8020"), conf);
+            OutputStream out = fs.create(new Path(getHDFSFilePath(fileName)), new Progressable() {
+                public void progress() {
+                }
+            });
+            IOUtils.copyBytes(in, out, 4096, true);
+        }
+        System.out.println(" >>>> end of writeToHDFSFile <<<<< ");
 
-        Connection con = DriverManager.getConnection("jdbc:hive2://localhost:10000/test_dv", "", "");
-        Statement stmt = con.createStatement();
-        String tableName = "test";
-        String filepath = this.getClass().getClassLoader().getResource("test.txt").getPath().toString();
-        System.out.println(">>>> filepath <<<<< " + filepath);
-        String sql = "LOAD DATA LOCAL INPATH '" + filepath + "' INTO TABLE " + tableName;
-        System.out.println("Running: " + sql);
-        stmt.executeQuery(sql);
     }
 
-    public void writeToFile(File file, List<String> hqlStatements) throws IOException {
+    private void writeToHiveTable(String tableName, String fileName) throws SQLException, IOException, ClassNotFoundException {
+        String driverName = "org.apache.hive.jdbc.HiveDriver";
+        Class.forName(driverName);
+        Connection con = DriverManager.getConnection("jdbc:hive2://localhost:10000/test_dv", "", "");
+        Statement stmt = con.createStatement();
+        String sql = "load data inpath '" + getHDFSFilePath(fileName) + "' overwrite into table " + tableName;
+        stmt.execute(sql);
+    }
+
+    private void writeToFile(File file, List<String> hqlStatements) throws IOException {
         Iterator<String> sqlIterator = hqlStatements.iterator();
-        while(sqlIterator.hasNext()){
-            Files.write(file.toPath(),(sqlIterator.next().trim() + LINE_SEPERATOR).getBytes(), APPEND);
+        while (sqlIterator.hasNext()) {
+            Files.write(file.toPath(), (sqlIterator.next().trim() + LINE_SEPERATOR).getBytes(), APPEND);
         }
+    }
+
+    private String getSourceFilePath(String fileName) throws IOException {
+        final File file = Paths.get(fileName).toFile();
+        return file.getCanonicalPath();
+    }
+
+    private String getHDFSFilePath(String fileName) {
+        return HDFS_TMP_PATH + fileName;
     }
 
 }
