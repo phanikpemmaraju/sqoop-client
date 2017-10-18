@@ -12,15 +12,14 @@ public class SqoopClient {
     private static SqoopOptions sqoopOptions = new SqoopOptions();
     private static CdsSqoopTool cdsSqoopTool = new CdsSqoopTool();
 
-    public static void main(String... args) throws SQLException, IOException, ClassNotFoundException{
-        String properties = "connection.properties";
-        String checkPopulateDataFlag = System.getProperty("populate");
-        if(checkPopulateDataFlag == null){
-            //runSqoop("src/main/resources/hive-hql","hive.q");
+    public static void main(String... args) throws SQLException, IOException, ClassNotFoundException {
+        Boolean checkPopulateDataFlag = Boolean.valueOf(System.getProperty("populate"));
+
+        if (!checkPopulateDataFlag)
             populateDataVault();
-        }else{
+        else
             populateDataVault();
-        }
+
     }
 
     private static void setUp() {
@@ -32,12 +31,12 @@ public class SqoopClient {
         sqoopOptions.setHiveDatabaseName(HIVE_DATABASE_NAME_CLASSIFIER);
     }
 
-    public static void runSqoop(final String filePath,final String fileName) throws SQLException, IOException, ClassNotFoundException {
+    public static void runSqoop(final String filePath, final String fileName) throws SQLException, IOException, ClassNotFoundException {
         setUp();
-        cdsSqoopTool.generateDataVaultHQL(sqoopOptions, "", "");
+        cdsSqoopTool.generateDataVaultHQL(sqoopOptions, filePath, fileName);
     }
 
-    public static void populateDataVault() throws IOException , SQLException , ClassNotFoundException {
+    public static void populateDataVault() throws IOException, SQLException, ClassNotFoundException {
         cdsSqoopTool.createAndPopulateDataVault();
     }
 

@@ -20,6 +20,11 @@ public class GenerateHql {
     public static String USERNAME = PropertiesFileUtil.getProperty("USERNAME");
     public static String PASSWORD = PropertiesFileUtil.getProperty("PASSWORD");
     public static String DRIVER = PropertiesFileUtil.getProperty("DRIVER");
+    public static String HDFS_URL =  PropertiesFileUtil.getProperty("HDFS_URL");
+    public static String HIVE_CONNECTION_URL =  PropertiesFileUtil.getProperty("HIVE_URL");
+    public static String HIVE_USER =  PropertiesFileUtil.getProperty("HIVE_USER");
+    public static String HIVE_PASSWORD =  PropertiesFileUtil.getProperty("HIVE_PASSWORD");
+    public static String HIVE_DRIVER =  PropertiesFileUtil.getProperty("HIVE_DRIVER");
 
     public static final String SQL_FILE_EXTENSION = ".sql";
     public static final String HQL_FILE_EXTENSION = ".q";

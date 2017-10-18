@@ -26,6 +26,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import static org.apache.commons.lang.StringUtils.EMPTY;
+
 public class CdsSqoopTool extends BaseSqoopTool {
 
     private TableDefWriter tableWriter;
@@ -88,7 +90,6 @@ public class CdsSqoopTool extends BaseSqoopTool {
             writeToHDFSFile(filePath);
             writeToHiveTable(filePath.split(".txt")[0], filePath);
         }
-
     }
 
     public List<String> getAllTables(SqoopOptions options) throws IOException {
@@ -111,28 +112,20 @@ public class CdsSqoopTool extends BaseSqoopTool {
     }
 
     private void writeToHDFSFile(String fileName) throws IOException {
-        System.out.println(" >>>> start of writeToHDFSFile <<<<< ");
-
         final String sourceFilePath = getSourceFilePath(TEST_FILES_PATH + File.separator + fileName);
         try(InputStream in = new BufferedInputStream(new FileInputStream(sourceFilePath));){
             Configuration conf = new Configuration();
             conf.set("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
             conf.set("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName());
-            FileSystem fs = FileSystem.get(URI.create("hdfs://quickstart.cloudera:8020"), conf);
-            OutputStream out = fs.create(new Path(getHDFSFilePath(fileName)), new Progressable() {
-                public void progress() {
-                }
-            });
+            FileSystem fs = FileSystem.get(URI.create(GenerateHql.HDFS_URL), conf);
+            OutputStream out = fs.create(new Path(getHDFSFilePath(fileName)), new Progressable() {public void progress() {}});
             IOUtils.copyBytes(in, out, 4096, true);
         }
-        System.out.println(" >>>> end of writeToHDFSFile <<<<< ");
-
     }
 
     private void writeToHiveTable(String tableName, String fileName) throws SQLException, IOException, ClassNotFoundException {
-        String driverName = "org.apache.hive.jdbc.HiveDriver";
-        Class.forName(driverName);
-        Connection con = DriverManager.getConnection("jdbc:hive2://localhost:10000/test_dv", "", "");
+        Class.forName(GenerateHql.HIVE_DRIVER);
+        Connection con = DriverManager.getConnection(GenerateHql.HIVE_CONNECTION_URL, EMPTY, EMPTY);
         Statement stmt = con.createStatement();
         String sql = "load data inpath '" + getHDFSFilePath(fileName) + "' overwrite into table " + tableName;
         stmt.execute(sql);
