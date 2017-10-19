@@ -16,14 +16,12 @@ import java.io.*;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import static org.apache.commons.lang.StringUtils.EMPTY;
@@ -34,18 +32,15 @@ public class CdsSqoopTool extends BaseSqoopTool {
 
     private ConnManager manager;
 
-    private final String LINE_SEPERATOR = System.lineSeparator();
-
-    private final StandardOpenOption APPEND = StandardOpenOption.APPEND;
+    private Utils utils;
 
     private final String STORE_TEXT_FILE = " STORED AS TEXTFILE;";
 
     private final String TEST_FILES_PATH = "src/main/resources/test-files";
 
-    public static final String HDFS_TMP_PATH = "/tmp/";
-
     public CdsSqoopTool() {
         super("customs-tool");
+        utils = new Utils();
     }
 
     public void setTableWriter(TableDefWriter tableWriter) {
@@ -56,12 +51,10 @@ public class CdsSqoopTool extends BaseSqoopTool {
         this.manager = manager;
     }
 
-
     @Override
     public int run(SqoopOptions sqoopOptions) {
         return 1;
     }
-
 
     public void generateDataVaultHQL(SqoopOptions options, String outputDirectory, String fileName) throws IOException, SQLException, ClassNotFoundException {
         final List<String> tables = getAllTables(options);
@@ -77,7 +70,7 @@ public class CdsSqoopTool extends BaseSqoopTool {
 
         for (int tableIndex = 0; tableIndex < tables.size(); tableIndex++) {
             List<String> statements = generateTableHQL(options, tables.get(tableIndex));
-            writeToFile(file, statements);
+            utils.writeToFile(file, statements);
         }
     }
 
@@ -88,7 +81,7 @@ public class CdsSqoopTool extends BaseSqoopTool {
         for (int fileIndex = 0; fileIndex < files.size(); fileIndex++) {
             String filePath = files.get(fileIndex);
             writeToHDFSFile(filePath);
-            writeToHiveTable(filePath.split(".txt")[0], filePath);
+            writeToHiveTable(filePath);
         }
     }
 
@@ -112,39 +105,23 @@ public class CdsSqoopTool extends BaseSqoopTool {
     }
 
     private void writeToHDFSFile(String fileName) throws IOException {
-        final String sourceFilePath = getSourceFilePath(TEST_FILES_PATH + File.separator + fileName);
-        try(InputStream in = new BufferedInputStream(new FileInputStream(sourceFilePath));){
-            Configuration conf = new Configuration();
-            conf.set("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
-            conf.set("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName());
-            FileSystem fs = FileSystem.get(URI.create(GenerateHql.HDFS_URL), conf);
-            OutputStream out = fs.create(new Path(getHDFSFilePath(fileName)), new Progressable() {public void progress() {}});
-            IOUtils.copyBytes(in, out, 4096, true);
-        }
+        final String sourceFilePath = utils.getSourceFilePath(TEST_FILES_PATH + File.separator + fileName);
+        Configuration conf = new Configuration();
+        conf.set("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
+        conf.set("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName());
+        FileSystem fs = FileSystem.get(URI.create(GenerateHql.HDFS_URL), conf);
+        InputStream in = new BufferedInputStream(new FileInputStream(sourceFilePath));
+        OutputStream out = fs.create(new Path(utils.getHDFSFilePath(fileName)), new Progressable() {
+                    public void progress() {}});
+        IOUtils.copyBytes(in, out, 4096, true);
     }
 
-    private void writeToHiveTable(String tableName, String fileName) throws SQLException, IOException, ClassNotFoundException {
+    private void writeToHiveTable(String tableName) throws SQLException, IOException, ClassNotFoundException {
         Class.forName(GenerateHql.HIVE_DRIVER);
         Connection con = DriverManager.getConnection(GenerateHql.HIVE_CONNECTION_URL, EMPTY, EMPTY);
         Statement stmt = con.createStatement();
-        String sql = "load data inpath '" + getHDFSFilePath(fileName) + "' overwrite into table " + tableName;
+        String sql = "load data inpath '" + utils.getHDFSFilePath(tableName) + "' overwrite into table " + tableName;
         stmt.execute(sql);
-    }
-
-    private void writeToFile(File file, List<String> hqlStatements) throws IOException {
-        Iterator<String> sqlIterator = hqlStatements.iterator();
-        while (sqlIterator.hasNext()) {
-            Files.write(file.toPath(), (sqlIterator.next().trim() + LINE_SEPERATOR).getBytes(), APPEND);
-        }
-    }
-
-    private String getSourceFilePath(String fileName) throws IOException {
-        final File file = Paths.get(fileName).toFile();
-        return file.getCanonicalPath();
-    }
-
-    private String getHDFSFilePath(String fileName) {
-        return HDFS_TMP_PATH + fileName;
     }
 
 }
