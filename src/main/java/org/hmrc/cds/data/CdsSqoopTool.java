@@ -38,14 +38,9 @@ public class CdsSqoopTool extends BaseSqoopTool {
 
     private final String TEST_FILES_PATH = "src/main/resources/test-files";
 
-    private Configuration conf;
-
     public CdsSqoopTool() {
         super("customs-tool");
         utils = new Utils();
-        conf = new Configuration();
-        conf.set("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
-        conf.set("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName());
     }
 
     public void setTableWriter(TableDefWriter tableWriter) {
@@ -111,15 +106,16 @@ public class CdsSqoopTool extends BaseSqoopTool {
 
     private void writeToHDFSFile(String fileName) throws IOException {
         final String sourceFilePath = utils.getSourceFilePath(TEST_FILES_PATH + File.separator + fileName);
+        Configuration conf = new Configuration();
+        conf.set("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
+        conf.set("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName());
         FileSystem fs = FileSystem.get(URI.create(GenerateHql.HDFS_URL), conf);
-        try (InputStream in = new BufferedInputStream(new FileInputStream(sourceFilePath));
-             OutputStream out = fs.create(new Path(utils.getHDFSFilePath(fileName)), new Progressable() {
-                 public void progress() {
-                 }
-             });
-        ) {
-            IOUtils.copyBytes(in, out, 4096, true);
-        }
+        InputStream in = new BufferedInputStream(new FileInputStream(sourceFilePath));
+        OutputStream out = fs.create(new Path(utils.getHDFSFilePath(fileName)), new Progressable() {
+            public void progress() {
+            }
+        });
+        IOUtils.copyBytes(in, out, 4096, true);
     }
 
     private void writeToHiveTable(String tableName) throws SQLException, IOException, ClassNotFoundException {

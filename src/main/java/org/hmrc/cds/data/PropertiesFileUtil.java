@@ -7,11 +7,12 @@ import org.apache.commons.configuration.PropertiesConfiguration;
 public class PropertiesFileUtil {
 
     private static PropertiesConfiguration configuration = null;
+    private static String profile = System.getProperty("profile");
 
     static
     {
         try{
-            configuration = new PropertiesConfiguration("connection.properties");
+            configuration = new PropertiesConfiguration(PropertiesFileUtil.class.getClassLoader().getResource("profiles/"+profile+"/connection.properties"));
         } catch (ConfigurationException ex) {
             ex.printStackTrace();
         }
